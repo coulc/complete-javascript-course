@@ -1,9 +1,9 @@
 'use strict';
 
 /*
- * Author:   coulc 
- * Date:     2025/5/1
- */
+    Author:   coulc 
+    Date:     2025/5/1
+*/
 
 /*
 console.log(document.querySelector('.message').textContent);
@@ -19,9 +19,6 @@ console.log(document.querySelector('.guess').value);
 let secretNumber = Math.trunc(Math.random() * 20) + 1; // 1 ~ 20
 let score = 20;
 let highScore = 0;
-
-// temp 
-console.log(secretNumber);
 
 function displayMessage(message){
     document.querySelector('.message').textContent = message;
@@ -89,5 +86,4 @@ document.querySelector('.again').addEventListener('click', () => {
     document.querySelector('.guess').value='';
     document.querySelector('body').style.backgroundColor = '#222';
     document.querySelector('.number').style.width = '15rem';
-    console.log(secretNumber);
 })
