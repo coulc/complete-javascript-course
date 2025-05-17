@@ -2,7 +2,7 @@
 /*
     Author:   coulc 
     Date:     2025/5/10
-    */
+*/
 
 const modal = document.querySelector('.modal');
 const overaly = document.querySelector('.overlay');

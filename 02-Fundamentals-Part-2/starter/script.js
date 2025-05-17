@@ -1,18 +1,18 @@
 'use strict';      // enable strict mode,must be on the frist line 
 
 /*
- * Author:   coulc 
- * Date:     2025/4/26
- * study:
- *      strict mode,
- *      function,
- *      function expression,
- *      arrow function,
- *      array,
- *      object,
- *      for,
- *      while,
-*/
+    Author:   coulc 
+    Date:     2025/4/26
+    study:
+        strict mode,
+        function,
+        function expression,
+        arrow function,
+        array,
+        object,
+        for,
+        while,
+        */
 
 function logger(){
     console.log("hello world");
@@ -94,13 +94,13 @@ console.log(friends);  //  ["Michael","Steven","Pater"];
 
 const years = new Array(1999,2000,2001,2002);
 console.log(years);   // [1999,2000,2001,2002]
- 
+
 console.log(friends[0]); // Michael
 console.log(years[1]);   // 2000
 
 console.log(friends.length);    // 3
 console.log(years[years.length - 1]);  // 2002
- 
+
 friends[2] = 'Jay';
 console.log(friends);  //  ["Michael","Steven","Jay"];
 
