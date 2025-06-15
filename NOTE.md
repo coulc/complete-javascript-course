@@ -326,3 +326,13 @@
         执行一个宏任务: 从任务队列中取出一个宏任务执行
         重复上述过程:   不断循环,直到所有任务完成
 
+# Promise.race() allSettled() any() 
+    - race()
+        接收一个 Promise 可迭代对象，返回一个新的 Promise,谁快返回谁(无论Fulfilled还是Rejected)
+    - allSettled()
+        接收一个 Promise 可迭代对象，返回一个新的 Promise，
+        该 Promise 会在所有输入的 Promise 都敲定后（无论成功失败）完成，并返回每个 Promise 的结果描述对象
+    - any()
+        接收一个 Promise 可迭代对象，返回一个新的 Promise，
+        该 Promise 会在任意一个 Promise fulfilled 时立即 resolve，或者所有 Promise 都 rejected 时 reject
+      

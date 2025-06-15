@@ -1,5 +1,24 @@
 'use strict';
 
+/*
+    
+    Author:   coulc 
+    Date:     2025/6/14
+
+    study:
+        AJAX,callback,XMLHttpRequest()
+        fetch API 
+        consuming promises    then() catch()  finally()
+        chaining promises, handling rejected promises
+        throw error manually
+        async await 
+        event loop 
+        building a simple promise 
+        try ... catch ... finally
+        Promise.any() Promise.race() Promise.allSettled()
+
+*/
+
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
 
@@ -389,4 +408,530 @@ whereAmI(-33.933,18.474);
 */
 
 
+/*
+// Event loop 
+console.log('test start');  // 1 
+setTimeout(() => console.log('0 sec timer'),0);  // 5
+Promise.resolve('Resolved Promise 1').then(res => console.log(res));  // 3
+console.log('test end');  // 2 
 
+Promise.resolve('Resolved Promise 2').then(res => {  // 4 
+    for(let i = 0;i < 10000000000; i ++){};
+    console.log(res);
+});
+
+*/
+
+/*
+// build a simple promise 
+const lotteryPromise = new Promise((resolve,reject) => {
+    console.log('lotter draw is happening');
+    setTimeout(() => {
+        if(Math.random() >= 0.5 ){
+            resolve('you win.');
+        }else{
+            reject(new Error('you lost your money.'));
+        };
+    },2000);
+});
+
+lotteryPromise
+    .then(data => console.log(data))   
+    .catch((err => console.error(err)));
+
+// promisifying setTimeout
+const wait = (seconds) => {
+    return new Promise(resolve => {
+        setTimeout(resolve,seconds * 1000);
+    });
+};
+
+wait(2)
+    .then(() => {
+        console.log('i waited for 2 seconds');
+        return wait(2);
+    })
+    .then(() => {
+        console.log('i waited for 2 seconds');
+        return wait(3);
+    })
+    .then(() => {
+        console.log('i waited for 3 seconds');
+        return wait(1);
+    })
+    .then(() => {
+        console.log('i waited for 1 seconds');
+    });
+
+// setTimeout(() => {
+//     console.log('1 second passed');
+//     setTimeout(() => {
+//         console.log('2 second passed');
+//         setTimeout(() => {
+//             console.log('3 second passed');
+//             setTimeout(() => {
+//                 console.log('4 second passed');
+//             },1000);
+//         },1000);
+//     },1000);
+// },1000);
+
+Promise.resolve('abc').then(data => console.log(data));
+Promise.reject(new Error('error!!!!!')).catch(err => console.error(err));
+
+*/
+
+/*
+const getPosition = () => {
+    return new Promise((resolve,reject) =>{
+        navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            err => reject(err)
+        );
+    });
+};
+
+// getPosition().then(pos => console.log(pos));
+
+
+const whereAmI = () =>{
+    getPosition()
+        .then(pos =>{
+            // const {lat = latitude , lng = longitude} = pos.coords;
+            const {latitude : lat ,  longitude : lng} = pos.coords;
+            return fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`)
+        })
+        .then(response => {
+            if(!response.ok){
+                throw new Error(`Problem with geocoding ${response.status}`);
+            }
+            console.log(response);
+            return response.json();
+        }).then(data =>{
+            console.log(data);
+            console.log(`You are in ${data.city},${data.countryName}`);
+
+            return fetch(`https://restcountries.com/v2/name/${data.countryName}`);
+        })
+        .then(res =>{
+            if(!res.ok){
+                throw new Error(`Country not found(${res.status})`);
+            }
+            return res.json();
+        })
+        .then(data => {
+            renderCountry(data[0]);
+        })
+        .catch((err) => console.error(`you error: ${err.message}`))
+}
+
+btn.addEventListener('click',whereAmI);
+*/
+
+
+
+///////////////////////////////////////
+// Coding Challenge #2
+
+/* 
+Build the image loading functionality that I just showed you on the screen.
+
+Tasks are not super-descriptive this time, so that you can figure out some stuff on your own. Pretend you're working on your own 😉
+
+PART 1
+1. Create a function 'createImage' which receives imgPath as an input. This function returns a promise which creates a new image (use document.createElement('img')) and sets the .src attribute to the provided image path. When the image is done loading, append it to the DOM element with the 'images' class, and resolve the promise. The fulfilled value should be the image element itself. In case there is an error loading the image ('error' event), reject the promise.
+
+If this part is too tricky for you, just watch the first part of the solution.
+
+PART 2
+2. Comsume the promise using .then and also add an error handler;
+3. After the image has loaded, pause execution for 2 seconds using the wait function we created earlier;
+4. After the 2 seconds have passed, hide the current image (set display to 'none'), and load a second image (HINT: Use the image element returned by the createImage promise to hide the current image. You will need a global variable for that 😉);
+5. After the second image has loaded, pause execution for 2 seconds again;
+6. After the 2 seconds have passed, hide the current image.
+
+TEST DATA: Images in the img folder. Test the error handler by passing a wrong image path. Set the network speed to 'Fast 3G' in the dev tools Network tab, otherwise images load too fast.
+
+GOOD LUCK 😀
+*/
+/*
+const wait = (seconds) => {
+    return new Promise(resolve => {
+        setTimeout(resolve,seconds * 1000);
+    });
+};
+
+const imgContainer = document.querySelector('.images');
+
+const createImg = (imgPath) => {
+    return new Promise((resolve,reject) =>{
+        const img = document.createElement('img');
+        img.src = imgPath;
+
+        img.addEventListener('load',() => {
+            imgContainer.append(img);
+            resolve(img)
+        });
+
+        img.addEventListener('error',() => {
+            reject(new Error('Image not found'));
+        });
+    });
+};
+
+let currentImg ;
+createImg('./img/img-1.jpg')
+    .then( img => {
+        currentImg = img; 
+        console.log('Image 1 loaded');
+        return wait(2);
+    })
+    .then(() => {
+        currentImg.style.display = 'none'; 
+        return createImg('./img/img-2.jpg');
+    })
+    .then(img => {
+        currentImg = img;
+        console.log('Image 2 loaded');
+        return wait(2);
+    })
+    .then(() => {
+        currentImg.style.display = 'none';
+        return createImg('./img/img-3.jpg');
+    })
+    .then(img => {
+        currentImg = img;
+        console.log('Image 3 loaded');
+        return wait(2);
+    })
+    .then(() => {
+        currentImg.style.display = 'none';
+    })
+    .catch(err => console.log(err));
+*/
+
+/*
+// async await
+const getPosition = () => {
+    return new Promise((resolve,reject) =>{
+        navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            err => reject(err)
+        );
+    });
+};
+
+const whereAmI = async () => {
+    const pos = await getPosition(); 
+    const { latitude: lat , longitude: lng} = pos.coords; 
+
+    const resGeo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`);
+    const getData = await resGeo.json();
+    console.log(getData);
+
+    // fetch(`https://restcountries.com/v2/name/${country}`).then(res => console.log(res));
+    const res = await fetch(`https://restcountries.com/v2/name/${getData.country}`);
+    console.log(res);
+
+    const data = await res.json();
+    console.log(data);
+
+    renderCountry(data[0]);
+
+};
+
+// whereAmI('China');
+whereAmI();
+*/
+
+
+/*
+// try ... catch
+
+// try{
+//     let x = 123;
+//     const y= 2 ;
+//     y = x;
+// }catch (err){
+//     console.error(err)
+// }
+
+const getPosition = () => {
+    return new Promise((resolve,reject) =>{
+        navigator.geolocation.getCurrentPosition(
+            position => resolve(position),
+            err => reject(err)
+        );
+    });
+};
+
+const whereAmI = async () => {
+    try{
+        const pos = await getPosition(); 
+        const { latitude: lat , longitude: lng} = pos.coords; 
+
+        const resGeo = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}`);
+        if(!resGeo.ok){
+            throw new Error('Problem getting location data');
+        }
+        const dataGeo = await resGeo.json();
+        console.log(dataGeo);
+
+        // fetch(`https://restcountries.com/v2/name/${country}`).then(res => console.log(res));
+        const res = await fetch(`https://restcountries.com/v2/name/${getData.country}`);
+        if(!res.ok){
+            throw new Error('Problem getting country');
+        }
+        console.log(res);
+
+        const data = await res.json();
+        console.log(data);
+
+        renderCountry(data[0]);
+
+        return `You are in ${dataGeo.city},${dataGeo.countryName}`;
+    } catch(err){
+        console.error(err);
+        renderError(`Something went wrong ${err.message}`);
+        throw err;
+    }
+};
+
+// whereAmI('China');
+whereAmI();
+
+console.log('1. Will get location');   
+// const city = whereAmI();   // promise
+// console.log(city);
+
+// whereAmI()
+//     .then(city => console.log(`2: ${city}`))
+//     .catch(err => console.error(`2: ${err}`))
+//     .finally(() => {
+//         console.log(`3: Finished getting location`);
+//     });
+
+(async () => {
+    try{
+        const result = await whereAmI();
+        console.log(`2: ${result.city}`);
+    }catch(err) {
+        console.log(`2: ${err}`);
+    }
+    finally{
+        console.log(`3: Finished getting location`);
+    }
+})();
+
+
+
+// console.log('1. Will get location');   // 1
+// whereAmI();  // 3 
+// console.log('3. Finished getting location'); // 2
+
+*/
+
+/*
+
+// running promise in paralle
+const getJSON = (url,errorMsg= 'Something went wrong') => {
+    return fetch(url).then( response =>{
+        if(!response.ok){
+            throw new Error(`${errorMsg} ${response.status}`);
+        }
+        return response.json();
+    });
+}
+
+const get3Countries = async function(c1,c2,c3) {
+    try{
+        // const [data1] = await getJSON(`https://restcountries.com/v2/name/${c1}`);
+        // const [data2] = await getJSON(`https://restcountries.com/v2/name/${c2}`);
+        // const [data3] = await getJSON(`https://restcountries.com/v2/name/${c3}`);
+        //
+        // console.log([data1.capital,data2.capital,data3.capital]);
+
+        const data3 = await getJSON(`https://restcountries.com/v2/name/${c1}`);
+        const [data3] = await getJSON(`https://restcountries.com/v2/name/${c1}`);
+
+
+        const data = await Promise.all([
+            getJSON(`https://restcountries.com/v2/name/${c1}`),
+            getJSON(`https://restcountries.com/v2/name/${c2}`),
+            getJSON(`https://restcountries.com/v2/name/${c3}`)
+        ]);
+
+        console.log(data.map(d => d[0].capital));
+
+    }catch(err){
+        console.error(err);
+    }
+};
+get3Countries('china','portugal','usa');
+
+*/
+
+// other promise combinators: race, allsettled and any
+
+const getJSON = (url,errorMsg= 'Something went wrong') => {
+    return fetch(url).then( response =>{
+        if(!response.ok){
+            throw new Error(`${errorMsg} ${response.status}`);
+        }
+        return response.json();
+    });
+}
+// Promise.race
+(async function() {
+    const res = await Promise.race([
+        getJSON(`https://restcountries.com/v2/name/china`),
+        getJSON(`https://restcountries.com/v2/name/portugal`),
+        getJSON(`https://restcountries.com/v2/name/usa`)
+    ]);
+    console.log(res[0]);
+    console.log(res);
+})();
+
+const timeout = function(sec){
+    return new Promise((_,reject) => {
+        setTimeout(() => {
+            reject(new Error('Request took too long'));
+        },sec * 1000);
+    });
+};
+
+Promise.race([
+    getJSON(`https://restcountries.com/v2/name/china`),
+    // timeout(0.01)
+    timeout(1)
+]).then(data => console.log(data[0])).catch(err => console.error(err));
+
+// Promise.allSettled
+Promise.allSettled([
+    Promise.resolve('Success'),
+    Promise.reject('Error'),
+    Promise.resolve('Success'),
+]).then(data => console.log(data)).catch(err => console.error(err));
+
+
+// Promise.any
+Promise.any([
+    Promise.resolve('One Success'),
+    Promise.reject('Error'),
+    Promise.resolve('Two Success'),
+]).then(data => console.log(data)).catch(err => console.error(err));
+
+
+
+
+///////////////////////////////////////
+// Coding Challenge #3
+
+/* 
+PART 1
+Write an async function 'loadNPause' that recreates Coding Challenge #2, this time using async/await (only the part where the promise is consumed). Compare the two versions, think about the big differences, and see which one you like more.
+Don't forget to test the error handler, and to set the network speed to 'Fast 3G' in the dev tools Network tab.
+
+PART 2
+1. Create an async function 'loadAll' that receives an array of image paths 'imgArr';
+2. Use .map to loop over the array, to load all the images with the 'createImage' function (call the resulting array 'imgs')
+3. Check out the 'imgs' array in the console! Is it like you expected?
+4. Use a promise combinator function to actually get the images from the array 😉
+5. Add the 'paralell' class to all the images (it has some CSS styles).
+
+TEST DATA: ['img/img-1.jpg', 'img/img-2.jpg', 'img/img-3.jpg']. To test, turn off the 'loadNPause' function.
+
+GOOD LUCK 😀
+*/
+
+const wait = (seconds) => {
+    return new Promise(resolve => {
+        setTimeout(resolve,seconds * 1000);
+    });
+};
+
+const imgContainer = document.querySelector('.images');
+
+const createImg = (imgPath) => {
+    return new Promise((resolve,reject) =>{
+        const img = document.createElement('img');
+        img.src = imgPath;
+
+        img.addEventListener('load',() => {
+            imgContainer.append(img);
+            resolve(img)
+        });
+
+        img.addEventListener('error',() => {
+            reject(new Error('Image not found'));
+        });
+    });
+};
+
+const loadNPause = async function(){
+    try{
+        let img = await createImg('./img/img-1.jpg');
+        console.log('Image 1 loaded'); 
+        await wait(2);
+        img.style.display = 'none';
+
+        img = await createImg('./img/img-2.jpg');
+        console.log('Image 2 loaded'); 
+        await wait(2);
+        img.style.display = 'none';
+
+        img = await createImg('./img/img-3.jpg');
+        console.log('Image 3 loaded'); 
+        await wait(2);
+        img.style.display = 'none';
+    }catch(err){
+        console.error(err);
+    };
+};
+// loadNPause();
+
+const loadAll = async function(imgArr){
+    try{
+        const imgs = imgArr.map(async img => 
+            await createImg(img)
+        );
+        console.log(imgs);
+        const imgsEl = await Promise.all(imgs);
+        console.log(imgsEl);
+        imgsEl.forEach(img => img.classList.add('parallel')); 
+    }catch(err){
+    }
+}
+loadAll(['./img/img-1.jpg','./img/img-2.jpg','./img/img-3.jpg',]);
+
+
+
+// let currentImg ;
+// createImg('./img/img-1.jpg')
+//     .then( img => {
+//         currentImg = img; 
+//         console.log('Image 1 loaded');
+//         return wait(2);
+//     })
+//     .then(() => {
+//         currentImg.style.display = 'none'; 
+//         return createImg('./img/img-2.jpg');
+//     })
+//     .then(img => {
+//         currentImg = img;
+//         console.log('Image 2 loaded');
+//         return wait(2);
+//     })
+//     .then(() => {
+//         currentImg.style.display = 'none';
+//         return createImg('./img/img-3.jpg');
+//     })
+//     .then(img => {
+//         currentImg = img;
+//         console.log('Image 3 loaded');
+//         return wait(2);
+//     })
+//     .then(() => {
+//         currentImg.style.display = 'none';
+//     })
+//     .catch(err => console.log(err));
